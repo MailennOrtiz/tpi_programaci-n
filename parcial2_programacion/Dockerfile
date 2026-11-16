@@ -11,6 +11,8 @@ RUN python -m pip install --no-cache-dir -r requirements.txt \
     && adduser -S -D -H -G libreria libreria
 
 COPY app/ ./app/
+COPY alembic.ini .
+COPY migrations/ ./migrations/
 
 USER libreria
 EXPOSE 8000
@@ -18,4 +20,4 @@ EXPOSE 8000
 HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=3 \
     CMD ["wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8000/health/ready"]
 
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "alembic upgrade head && exec python -m uvicorn app.main:app --host 0.0.0.0 --port 8000"]
