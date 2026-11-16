@@ -1,0 +1,20 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.env
+.pytest_cache/
+*.egg-info/
+
+# Node / tooling
+node_modules/
+
+# Playwright / tooling artifacts
+.playwright-mcp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
+*.tmp
