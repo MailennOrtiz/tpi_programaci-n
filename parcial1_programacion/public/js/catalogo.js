@@ -107,10 +107,51 @@ function crearTarjetaLibro(libro) {
   botonDetalle.type = "button";
   botonDetalle.className = "boton boton-secundario";
   botonDetalle.textContent = "Ver detalle y autores";
-  botonDetalle.addEventListener("click", () => {
-    verDetalleLibro(libro.id);
+
+  const detalleTarjeta = document.createElement("div");
+  detalleTarjeta.className = "detalle-libro-tarjeta";
+  detalleTarjeta.hidden = true;
+
+  botonDetalle.addEventListener("click", async () => {
+    if (typeof verDetalleLibro === "function") {
+      verDetalleLibro(libro.id);
+    }
+
+    if (!detalleTarjeta.hidden) {
+      detalleTarjeta.hidden = true;
+      botonDetalle.textContent = "Ver detalle y autores";
+      return;
+    }
+
+    detalleTarjeta.hidden = false;
+    detalleTarjeta.textContent = "Cargando detalle y autores...";
+    botonDetalle.textContent = "Ocultar detalle y autores";
+
+    try {
+      const libroCompleto = await apiFetch(`/libros/${libro.id}`);
+      const autores = resolverNombresAutores(libroCompleto) || "Sin autores";
+      detalleTarjeta.replaceChildren();
+
+      const lineas = [
+        `Editorial: ${resolverNombreEditorial(libroCompleto)}`,
+        `Género: ${resolverGenero(libroCompleto)}`,
+        `Autores: ${autores}`,
+        `Stock: ${libroCompleto.stock}`,
+        `Precio: $${formatearPrecio(libroCompleto.precio)}`
+      ];
+
+      lineas.forEach((texto) => {
+        const p = document.createElement("p");
+        p.textContent = texto;
+        detalleTarjeta.appendChild(p);
+      });
+    } catch (e) {
+      detalleTarjeta.textContent = mensajeErrorApi(e) || "No se pudo cargar el detalle.";
+    }
   });
+
   tarjeta.appendChild(botonDetalle);
+  tarjeta.appendChild(detalleTarjeta);
 
   return tarjeta;
 }

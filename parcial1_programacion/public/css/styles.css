@@ -330,6 +330,20 @@ select.campo[multiple] {
   font-variant-numeric: tabular-nums;
 }
 
+.detalle-libro-tarjeta {
+  margin-top: var(--espacio-3);
+  padding: var(--espacio-3);
+  background-color: var(--papel);
+  border: 1px dashed var(--borde-campo);
+  border-radius: var(--radio-campo);
+  font-size: 0.875rem;
+}
+
+.detalle-libro-tarjeta p {
+  margin: var(--espacio-1) 0;
+  color: var(--tinta);
+}
+
 .mensaje {
   max-width: 72ch;
   border: 1px solid var(--borde);

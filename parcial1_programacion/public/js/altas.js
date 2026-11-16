@@ -120,22 +120,29 @@ async function actualizarVistasAltas() {
   await cargarOpcionesApi("libro-editorial", "/editoriales/", "id", "nombre", "Seleccioná una editorial", false);
   await cargarOpcionesApi("libro-genero", "/generos/", "id", "nombre", "Sin clasificar", true);
 
-  // Actualizar listado de clientes
+  // Actualizar listado de clientes desde la API (solo los almacenados en la base de datos)
   const listadoClientes = document.getElementById("listado-clientes");
+  const msgClientes = document.getElementById("mensaje-clientes-vacio");
   if (listadoClientes) {
-    listadoClientes.replaceChildren();
-    clientes.forEach((cliente) => {
-      const tarjeta = document.createElement("article");
-      tarjeta.className = "tarjeta-libro";
-      const nombre = document.createElement("h3");
-      nombre.textContent = cliente.nombreCompleto || cliente.nombre;
-      const email = document.createElement("p");
-      email.textContent = "Email: " + cliente.email;
-      tarjeta.append(nombre, email);
-      listadoClientes.append(tarjeta);
-    });
-    const msgClientes = document.getElementById("mensaje-clientes-vacio");
-    if (msgClientes) msgClientes.hidden = clientes.length > 0;
+    try {
+      const clientesDb = await apiFetch("/clientes/?limit=100&offset=0");
+      listadoClientes.replaceChildren();
+      const lista = Array.isArray(clientesDb) ? clientesDb : [];
+      lista.forEach((cliente) => {
+        const tarjeta = document.createElement("article");
+        tarjeta.className = "tarjeta-libro";
+        const nombre = document.createElement("h3");
+        nombre.textContent = `[ID: ${cliente.id}] ${cliente.nombre}`;
+        const email = document.createElement("p");
+        email.textContent = "Email: " + cliente.email;
+        tarjeta.append(nombre, email);
+        listadoClientes.append(tarjeta);
+      });
+      if (msgClientes) msgClientes.hidden = lista.length > 0;
+    } catch (e) {
+      listadoClientes.replaceChildren();
+      if (msgClientes) msgClientes.hidden = false;
+    }
   }
 
   // Actualizar listado de libros desde la API
@@ -236,8 +243,6 @@ async function manejarAltaCliente(evento) {
     const creado = await apiFetch("/clientes/", { method: "POST", body: JSON.stringify({ nombre: nombre, email: email }) });
     mostrarResultadoAlta(resultado, `Cliente registrado correctamente (id ${creado.id}).`, false);
     formulario.reset();
-    // Mantener lista local para ventas
-    clientes.push({ idCliente: creado.id, nombreCompleto: creado.nombre, email: creado.email });
     await actualizarVistasAltas();
   } catch (error) {
     mostrarResultadoAlta(resultado, mensajeErrorApi(error) || "No se pudo registrar el cliente.", true);

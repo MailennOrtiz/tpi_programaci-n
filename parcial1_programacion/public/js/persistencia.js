@@ -175,6 +175,12 @@ function guardarVentaPersistida() {
 document.addEventListener("libreria:alta", guardarAltaPersistida);
 document.addEventListener("libreria:venta-confirmada", guardarVentaPersistida);
 
-// El catálogo renderiza al evaluar su script: estas cargas deben precederlo.
-cargarColeccionPersistida("libros", libros);
-cargarColeccionPersistida("clientes", clientes);
+// Limpiar almacenamiento local legado para evitar mezclar datos simulados
+// con la base de datos real PostgreSQL.
+try {
+  localStorage.removeItem(clavesPersistencia.libros);
+  localStorage.removeItem(clavesPersistencia.clientes);
+  localStorage.removeItem(clavesPersistencia.ventas);
+} catch {
+  // Ignorar si localStorage está restringido
+}

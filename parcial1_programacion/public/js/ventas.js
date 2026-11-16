@@ -29,11 +29,33 @@ function poblarSelectorLibros() {
   const seleccionado = selector.value;
   const opciones = [crearOpcion("", "Seleccioná un libro")];
   librosApi.forEach((libro) => {
-    const opcion = crearOpcion(libro.id, `${libro.titulo} (${formatearImporte(libro.precio)})`);
+    const stockTexto = libro.stock > 0 ? `Stock: ${libro.stock}` : `SIN STOCK`;
+    const texto = `${libro.titulo} ($${formatearImporte(libro.precio)}) — ${stockTexto}`;
+    const opcion = crearOpcion(libro.id, texto);
+    if (libro.stock <= 0) {
+      opcion.disabled = true;
+    }
     opciones.push(opcion);
   });
   selector.replaceChildren(...opciones);
   if (seleccionado) selector.value = seleccionado;
+  actualizarMaximoCantidad();
+}
+
+function actualizarMaximoCantidad() {
+  const selector = document.getElementById("renglon-libro");
+  const inputCantidad = document.getElementById("renglon-cantidad");
+  if (!selector || !inputCantidad) return;
+  const libroId = Number(selector.value);
+  const libro = librosApi.find((l) => Number(l.id) === libroId);
+  if (libro && libro.stock > 0) {
+    inputCantidad.max = String(libro.stock);
+    if (Number(inputCantidad.value) > libro.stock) {
+      inputCantidad.value = String(libro.stock);
+    }
+  } else {
+    inputCantidad.removeAttribute("max");
+  }
 }
 
 function crearOpcion(valor, texto) {
@@ -93,6 +115,14 @@ function agregarRenglon() {
   const libro = librosApi.find((l) => Number(l.id) === libroId);
   if (!libro) {
     mostrarMensajeVenta("Libro no encontrado en el catálogo.", true);
+    return;
+  }
+  if (libro.stock <= 0) {
+    mostrarMensajeVenta(`No hay stock disponible para "${libro.titulo}".`, true);
+    return;
+  }
+  if (cantidad > libro.stock) {
+    mostrarMensajeVenta(`No podés comprar ${cantidad} unidades. El stock disponible de "${libro.titulo}" es de ${libro.stock} unidades.`, true);
     return;
   }
   renglonesVenta.push({
@@ -362,6 +392,11 @@ function iniciarVentas() {
       agregarRenglon();
     });
   }
+  const selectorLibro = document.getElementById("renglon-libro");
+  if (selectorLibro) {
+    selectorLibro.addEventListener("change", actualizarMaximoCantidad);
+  }
+
   const botonBuscarCliente = document.getElementById("boton-buscar-cliente");
   if (botonBuscarCliente) botonBuscarCliente.addEventListener("click", buscarClienteVenta);
   const botonConfirmar = document.getElementById("boton-confirmar-venta");
