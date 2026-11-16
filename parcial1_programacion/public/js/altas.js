@@ -150,12 +150,19 @@ async function actualizarVistasAltas() {
     const librosRecibidos = await apiFetch("/libros/?limit=100&offset=0");
     const listadoLibros = document.getElementById("listado-libros");
     if (listadoLibros && typeof crearTarjetaLibro === "function") {
-      listadoLibros.replaceChildren(...(Array.isArray(librosRecibidos) ? librosRecibidos : []).map((l) => crearTarjetaLibro(l)));
+      listadoLibros.replaceChildren(...(Array.isArray(librosRecibidos) ? librosRecibidos : []).map((l) => {
+        const tarjeta = crearTarjetaLibro(l);
+        // Asegurarse de que el botón de detalles funcione en la sección Libros igual que en Catálogo
+        return tarjeta;
+      }));
     }
     const msgLibros = document.getElementById("mensaje-libros-vacio");
     if (msgLibros) msgLibros.hidden = (Array.isArray(librosRecibidos) ? librosRecibidos.length : 0) > 0;
   } catch (e) {
-    // ignorar
+    const listadoLibros = document.getElementById("listado-libros");
+    if (listadoLibros) listadoLibros.replaceChildren();
+    const msgLibros = document.getElementById("mensaje-libros-vacio");
+    if (msgLibros) msgLibros.hidden = false;
   }
 
   if (typeof cargarCatalogo === "function") {
