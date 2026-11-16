@@ -166,10 +166,15 @@ function renderizarRenglones() {
     inputCantidad.className = "campo";
     inputCantidad.addEventListener("change", () => {
       const nueva = Number(inputCantidad.value);
-      if (Number.isInteger(nueva) && nueva > 0) {
+      const libro = librosApi.find((l) => Number(l.id) === renglon.libro_id);
+      const stockDisponible = libro ? libro.stock : nueva;
+      if (Number.isInteger(nueva) && nueva > 0 && nueva <= stockDisponible) {
         renglon.cantidad = nueva;
         renderizarRenglones();
       } else {
+        if (libro && nueva > stockDisponible) {
+          mostrarMensajeVenta(`No podés comprar ${nueva} unidades. El stock disponible de "${libro.titulo}" es de ${stockDisponible} unidades.`, true);
+        }
         inputCantidad.value = renglon.cantidad;
       }
     });

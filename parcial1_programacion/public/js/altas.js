@@ -132,7 +132,7 @@ async function actualizarVistasAltas() {
         const tarjeta = document.createElement("article");
         tarjeta.className = "tarjeta-libro";
         const nombre = document.createElement("h3");
-        nombre.textContent = `[ID: ${cliente.id}] ${cliente.nombre}`;
+        nombre.textContent = cliente.nombre;
         const email = document.createElement("p");
         email.textContent = "Email: " + cliente.email;
         tarjeta.append(nombre, email);

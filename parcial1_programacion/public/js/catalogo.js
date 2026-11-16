@@ -113,10 +113,6 @@ function crearTarjetaLibro(libro) {
   detalleTarjeta.hidden = true;
 
   botonDetalle.addEventListener("click", async () => {
-    if (typeof verDetalleLibro === "function") {
-      verDetalleLibro(libro.id);
-    }
-
     if (!detalleTarjeta.hidden) {
       detalleTarjeta.hidden = true;
       botonDetalle.textContent = "Ver detalle y autores";
