@@ -26,7 +26,7 @@ class DatosInicialesTest(unittest.IsolatedAsyncioTestCase):
                 await cargar(session)
         async with self.fabrica() as session:
             self.assertEqual(len((await session.exec(select(Libro))).all()), 2)
-            self.assertEqual(len((await session.exec(select(Cliente))).all()), 1)
+            self.assertEqual(len((await session.exec(select(Cliente))).all()), 2)
             with self.assertRaises(ValueError):
                 await cargar(session)
         async with self.fabrica() as session:

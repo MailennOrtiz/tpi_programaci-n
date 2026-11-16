@@ -36,26 +36,41 @@ async def cargar(session: AsyncSession) -> tuple[int, list[int]]:
         if (await session.exec(consulta)).first() is not None:
             raise ValueError("La base ya contiene datos de la librería; no se cargó nada.")
 
-    editorial = Editorial(nombre="Editorial Sur", pais="Argentina")
-    genero = Genero(nombre="Novela")
-    autores = [Autor(nombre="Julio Cortázar", nacionalidad="Argentina"),
-               Autor(nombre="Ricardo Piglia", nacionalidad="Argentina")]
-    cliente = Cliente(nombre="Tomás Ríos", email="tomas@example.com")
-    session.add_all([editorial, genero, *autores, cliente])
+    editorial = Editorial(nombre="Editorial Planeta", pais="Argentina")
+    genero = Genero(nombre="Ficción")
+    autores = [Autor(nombre="Jorge Luis Borges", nacionalidad="Argentina"),
+               Autor(nombre="Adolfo Bioy Casares", nacionalidad="Argentina")]
+    clientes = [
+        Cliente(nombre="María Gómez", email="maria.gomez@example.com"),
+        Cliente(nombre="Carlos Pérez", email="carlos.perez@example.com")
+    ]
+    session.add_all([editorial, genero, *autores, *clientes])
     await session.flush()
 
     libros = [
-        Libro(isbn="978-950-00-0001-1", titulo="Rayuela", precio=Decimal("25000.00"),
-              stock=10, editorial_id=editorial.id, genero_id=genero.id),
-        Libro(isbn="978-950-00-0002-8", titulo="Respiración artificial", precio=Decimal("27000.00"),
-              stock=8, editorial_id=editorial.id, genero_id=genero.id),
+        Libro(isbn="978-950-08-3420-1", titulo="Ficciones", precio=Decimal("18500.00"),
+              stock=12, editorial_id=editorial.id, genero_id=genero.id),
+        Libro(isbn="978-950-04-1234-5", titulo="La invención de Morel", precio=Decimal("19200.00"),
+              stock=5, editorial_id=editorial.id, genero_id=genero.id),
     ]
     session.add_all(libros)
     await session.flush()
     session.add_all([LibroAutor(libro_id=libro.id, autor_id=autor.id, rol="autor", orden=1)
                      for libro, autor in zip(libros, autores)])
     await session.flush()
-    return cliente.id, [libro.id for libro in libros]
+
+    ventas = [
+        Venta(cliente_id=clientes[0].id, total=Decimal("18500.00")),
+        Venta(cliente_id=clientes[1].id, total=Decimal("19200.00"))
+    ]
+    session.add_all(ventas)
+    await session.flush()
+    session.add_all([
+        RenglonVenta(venta_id=ventas[0].id, libro_id=libros[0].id, cantidad=1, precio_unitario=libros[0].precio, subtotal=libros[0].precio),
+        RenglonVenta(venta_id=ventas[1].id, libro_id=libros[1].id, cantidad=1, precio_unitario=libros[1].precio, subtotal=libros[1].precio)
+    ])
+    await session.flush()
+    return clientes[0].id, [libro.id for libro in libros]
 
 
 async def main() -> None:
