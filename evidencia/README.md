@@ -4,7 +4,16 @@
 
 El 16/11/2026 la [portada](https://libreria-grupo1.devgonzalosanchez.me/) y `/api/health/ready` devolvieron HTTP 200. Salud informó PostgreSQL disponible. En G-01, el filtro `titulo=ficciones` devolvió *Ficciones*, `limit=1&offset=1` devolvió el segundo libro, una búsqueda sin coincidencias devolvió `[]` y el detalle de *Ficciones* incluyó a Jorge Luis Borges.
 
-Queda por verificar la revisión activa en Easypanel y repetir G-02 a G-07 sobre el dominio actual. La venta 5 del registro histórico devolvió 404 en el dominio actual.
+Las comprobaciones públicas se hicieron por HTTP a través del proxy del frontend, después del primer redespliegue informado por el grupo.
+
+| Caso | Resultado observado en el dominio actual |
+| --- | --- |
+| G-02 | Alta del libro ficticio 3 con HTTP 201. El detalle confirmó stock 8, género nulo y autoría. El ISBN repetido devolvió 409. |
+| G-03 | Alta del cliente ficticio 3 con HTTP 201. La consulta por ID devolvió su nombre. El email repetido devolvió 409. |
+| G-04 | Alta de la venta 3 con HTTP 201, dos renglones y total de 19400.00. Tras recargar la página, se abrió el detalle desde el historial y se vieron ambos renglones, con subtotales de 200.00 y 19200.00. |
+| G-05 | Se cambió el precio del libro ficticio de 100.00 a 101.00. El detalle conservó los importes. Se restauró el precio a 100.00. |
+| G-06 | Cliente inexistente con 409 y libro repetido con 422. La respuesta del historial quedó igual. |
+| G-07 | Las imágenes se construyeron localmente. Portada y salud respondieron 200 por HTTPS. Tras el redespliegue exitoso del backend informado por el grupo, salud volvió a responder 200 y el detalle completo de la venta 3 se mantuvo idéntico. [JSON anterior](G-07-venta-3-antes.json) · [JSON posterior](G-07-venta-3-despues.json). |
 
 ## Verificación local con Docker y PostgreSQL
 
