@@ -5,6 +5,7 @@ No se ejecuta durante el arranque de la aplicación.
 """
 
 import asyncio
+from datetime import datetime, timezone
 from decimal import Decimal
 
 from sqlalchemy.exc import IntegrityError
@@ -68,8 +69,8 @@ async def cargar(session: AsyncSession) -> tuple[int, list[int]]:
     await session.flush()
 
     ventas = [
-        Venta(cliente_id=clientes[0].id, total=Decimal("18500.00")),
-        Venta(cliente_id=clientes[1].id, total=Decimal("19200.00"))
+        Venta(cliente_id=clientes[0].id, fecha=datetime.now(timezone.utc), total=Decimal("18500.00")),
+        Venta(cliente_id=clientes[1].id, fecha=datetime.now(timezone.utc), total=Decimal("19200.00"))
     ]
     session.add_all(ventas)
     await session.flush()
