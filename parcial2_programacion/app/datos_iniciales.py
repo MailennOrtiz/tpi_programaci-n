@@ -36,22 +36,30 @@ async def cargar(session: AsyncSession) -> tuple[int, list[int]]:
         if (await session.exec(consulta)).first() is not None:
             raise ValueError("La base ya contiene datos de la librería; no se cargó nada.")
 
-    editorial = Editorial(nombre="Editorial Planeta", pais="Argentina")
-    genero = Genero(nombre="Ficción")
-    autores = [Autor(nombre="Jorge Luis Borges", nacionalidad="Argentina"),
-               Autor(nombre="Adolfo Bioy Casares", nacionalidad="Argentina")]
+    editoriales = [
+        Editorial(nombre="Editorial Planeta", pais="Argentina"),
+        Editorial(nombre="Editorial Sudamericana", pais="Argentina")
+    ]
+    generos = [
+        Genero(nombre="Ficción"),
+        Genero(nombre="Ensayo")
+    ]
+    autores = [
+        Autor(nombre="Jorge Luis Borges", nacionalidad="Argentina"),
+        Autor(nombre="Adolfo Bioy Casares", nacionalidad="Argentina")
+    ]
     clientes = [
         Cliente(nombre="María Gómez", email="maria.gomez@example.com"),
         Cliente(nombre="Carlos Pérez", email="carlos.perez@example.com")
     ]
-    session.add_all([editorial, genero, *autores, *clientes])
+    session.add_all([*editoriales, *generos, *autores, *clientes])
     await session.flush()
 
     libros = [
         Libro(isbn="978-950-08-3420-1", titulo="Ficciones", precio=Decimal("18500.00"),
-              stock=12, editorial_id=editorial.id, genero_id=genero.id),
+              stock=12, editorial_id=editoriales[0].id, genero_id=generos[0].id),
         Libro(isbn="978-950-04-1234-5", titulo="La invención de Morel", precio=Decimal("19200.00"),
-              stock=5, editorial_id=editorial.id, genero_id=genero.id),
+              stock=5, editorial_id=editoriales[1].id, genero_id=generos[1].id),
     ]
     session.add_all(libros)
     await session.flush()
