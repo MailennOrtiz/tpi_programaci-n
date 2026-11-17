@@ -1,5 +1,25 @@
 # Verificación del Global
 
+## Dominio público actual
+
+El 16/11/2026 la [portada](https://libreria-grupo1.devgonzalosanchez.me/) y `/api/health/ready` devolvieron HTTP 200. Salud informó PostgreSQL disponible. En G-01, el filtro `titulo=ficciones` devolvió *Ficciones*, `limit=1&offset=1` devolvió el segundo libro, una búsqueda sin coincidencias devolvió `[]` y el detalle de *Ficciones* incluyó a Jorge Luis Borges.
+
+Queda por verificar la revisión activa en Easypanel y repetir G-02 a G-07 sobre el dominio actual. La venta 5 del registro histórico devolvió 404 en el dominio actual.
+
+## Verificación local con Docker y PostgreSQL
+
+Se construyeron ambas imágenes. El backend creó las tablas en una base PostgreSQL 16 vacía y la carga inicial insertó los datos de ejemplo. Un segundo intento de carga fue rechazado.
+
+| Caso | Resultado observado a través del proxy local |
+| --- | --- |
+| G-01 | Filtro, paginación, búsqueda sin coincidencias y detalle correctos. |
+| G-02 y G-03 | Alta y lectura de libro y cliente de prueba. Las altas devolvieron 201 y los duplicados, 409. |
+| G-04 y G-05 | El alta de una venta con dos renglones devolvió 201. El detalle volvió a devolver el mismo JSON y conservó los importes tras modificar el precio del libro. |
+| G-06 | Un cliente inexistente devolvió 409 y un libro repetido, 422. El historial quedó igual. |
+| G-07 local | Se recreó el contenedor de la API, se reinició el proxy y se conservó el contenedor PostgreSQL. Salud devolvió 200 y la venta conservó el mismo detalle. |
+
+## Registro histórico en el dominio anterior
+
 Ejecutado el 16/11/2026 sobre [Librería Nya](https://app-grupo1-libreria-frontend.ldb9fn.easypanel.host/) (revisión `234acba`). Las comprobaciones de códigos HTTP de rechazo y el cambio temporal de precio se hicieron desde el Swagger del backend público del mismo despliegue.
 
 | Caso | Pasos y resultado esperado | Resultado observado |

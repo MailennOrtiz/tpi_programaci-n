@@ -1,5 +1,7 @@
 # Despliegue de la librería web integrada
 
+URL pública actual: [Librería Nya](https://libreria-grupo1.devgonzalosanchez.me/). El dominio anterior se conserva en las evidencias históricas del Global.
+
 ## Servicios en Easypanel
 
 Configurá ambos servicios App en el mismo proyecto y usá la instancia PostgreSQL asignada. Seleccioná el repositorio del Global y la misma revisión para los dos servicios.
@@ -22,7 +24,7 @@ Las rutas anteriores corresponden al repositorio de GitHub. Si se publica el con
 Los valores de muestra están en [el ejemplo del frontend](parcial1_programacion/env.example) y [el del backend](parcial2_programacion/env.example).
 
 1. Reservá el dominio HTTPS del frontend. Configurá PostgreSQL con almacenamiento persistente y cargá las variables del backend desde el panel.
-2. Desplegá el backend, revisá los logs y quitá su dominio automático si se creó para este despliegue. La imagen de entrega ejecuta `alembic upgrade head` antes de iniciar Uvicorn en `0.0.0.0:8000`. La revisión inicial `20261116_01` crea las tablas en una base vacía o valida y registra una base existente compatible conservando sus datos. Si detecta un esquema incompleto o incompatible, la migración falla y el contenedor no inicia.
+2. Desplegá el backend, revisá los logs y quitá su dominio automático si se creó para este despliegue. La imagen inicia Uvicorn en `0.0.0.0:8000`. Al arrancar, la API usa `SQLModel.metadata.create_all` para crear tablas faltantes. Para reutilizar una base, su esquema debe ser compatible con los modelos. Los cambios de estructura sobre tablas existentes se aplican por separado.
 3. Desde la Shell del backend, comprobá salud y, si la base de prueba está vacía, ejecutá la carga inicial:
 
    ```sh
@@ -41,7 +43,7 @@ Los valores de muestra están en [el ejemplo del frontend](parcial1_programacion
 3. Recreá el contenedor del backend conservando el servicio PostgreSQL, su volumen y `DATABASE_URL`. Registrá el reemplazo del contenedor y esperá el 200 de salud.
 4. Desde la URL pública, consultá otra vez el mismo ID sin repetir la carga inicial. Compará el cliente, los renglones, los precios unitarios y el total. Guardá las respuestas de antes y después.
 
-## Registro de ejecución
+## Registro histórico de ejecución
 
 | Dato | Resultado |
 | --- | --- |
@@ -51,9 +53,8 @@ Los valores de muestra están en [el ejemplo del frontend](parcial1_programacion
 | Configuración activa del backend | Se aplicó `CORS_ORIGINS` con el origen HTTPS del frontend y se quitó el dominio directo. Tras el cambio, la web pública siguió mostrando el catálogo y `/api/health/ready` informó que PostgreSQL estaba disponible. |
 | Alembic sobre PostgreSQL existente | Docker construyó la imagen `libreria-backend-alembic:latest` (`ade5e94ab14c`). Se ejecutó `alembic upgrade head` dos veces. Quedó registrada la revisión `20261116_01`; *Rayuela* (25000.00, stock 10) y *Respiración artificial* (27000.00, stock 8) conservaron sus IDs, precios y stock. |
 | Alembic sobre PostgreSQL vacío | El contenedor inició con su comando habitual sobre `libreria_alembic_vacia`. Quedó registrada la revisión `20261116_01`, el catálogo tenía 0 libros y `/health/ready` respondió `{"estado":"listo","base_de_datos":"disponible"}`. |
-| Alembic en la VPS | Easypanel sigue ejecutando `234acba`. Falta publicar y desplegar la revisión que incorpora la migración. |
 | Frontend del Global | Easypanel marcó el despliegue como exitoso el 16/11/2026 a las 13:51 (Argentina). Servicio `app_grupo1/libreria_frontend`, rama `main`, ruta `/parcial1_programacion`, builder `Dockerfile` y `API_UPSTREAM=app_grupo1_libreria_backend:8000`. |
-| URL pública del frontend del Global | [Librería Nya](https://app-grupo1-libreria-frontend.ldb9fn.easypanel.host/). El navegador mostró el catálogo existente y `/api/health/ready` respondió `{"estado":"listo","base_de_datos":"disponible"}`. |
+| URL pública usada para estas pruebas | [Dominio anterior](https://app-grupo1-libreria-frontend.ldb9fn.easypanel.host/). El navegador mostró el catálogo existente y `/api/health/ready` respondió `{"estado":"listo","base_de_datos":"disponible"}`. |
 | Docker local del frontend | Build y ejecución verificados el 16/11/2026 en Ubuntu (WSL), con Docker 29.1.3. Imagen `libreria-frontend:latest` (`5f74e0129a39`), publicada en `127.0.0.1:8080`. |
 | Salud y catálogo locales | Nginx devolvió HTTP 200 en `/api/health/ready` y `/api/libros/?limit=20&offset=0`. PostgreSQL reportó disponibilidad y el catálogo devolvió *Rayuela* y *Respiración artificial*. |
 | Detalle en el navegador | Maximiliano confirmó que el detalle de *Rayuela* mostró a Julio Cortázar como autor el 16/11/2026. |

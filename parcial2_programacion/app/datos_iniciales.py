@@ -68,15 +68,17 @@ async def cargar(session: AsyncSession) -> tuple[int, list[int]]:
                      for libro, autor in zip(libros, autores)])
     await session.flush()
 
-    ventas = [
-        Venta(cliente_id=clientes[0].id, fecha=datetime.now(timezone.utc), total=Decimal("18500.00")),
-        Venta(cliente_id=clientes[1].id, fecha=datetime.now(timezone.utc), total=Decimal("19200.00"))
-    ]
-    session.add_all(ventas)
-    await session.flush()
+    fecha = datetime.now(timezone.utc)
     session.add_all([
-        RenglonVenta(venta_id=ventas[0].id, libro_id=libros[0].id, cantidad=1, precio_unitario=libros[0].precio, subtotal=libros[0].precio),
-        RenglonVenta(venta_id=ventas[1].id, libro_id=libros[1].id, cantidad=1, precio_unitario=libros[1].precio, subtotal=libros[1].precio)
+        Venta(
+            cliente_id=cliente.id,
+            fecha=fecha,
+            total=libro.precio,
+            renglones=[
+                RenglonVenta(libro_id=libro.id, cantidad=1, precio_unitario=libro.precio)
+            ],
+        )
+        for cliente, libro in zip(clientes, libros, strict=True)
     ])
     await session.flush()
     return clientes[0].id, [libro.id for libro in libros]
