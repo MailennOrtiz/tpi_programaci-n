@@ -91,8 +91,8 @@ async def main() -> None:
         print(f"Datos iniciales cargados. Cliente: {cliente_id}; libros: {libros_ids}.")
     except ValueError as error:
         raise SystemExit(str(error)) from None
-    except IntegrityError:
-        raise SystemExit("La base rechazó la carga; se revirtió la transacción.") from None
+    except IntegrityError as error:
+        raise SystemExit(str(error)) from None
     finally:
         await motor.dispose()
 
